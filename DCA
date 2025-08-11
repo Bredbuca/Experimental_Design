@@ -1,0 +1,93 @@
+# Diseños completamente aleatorizados
+# Especializacion en estadistica
+
+# Determinación del número de repeticiones
+install.packages("daewr")
+library(daewr)
+rmin <-2 #smallest number of replicates considered
+rmax <-10 # largest number of replicates considered
+alpha <- rep(0.05, rmax - rmin +1)
+alpha
+sigma <-1.058
+sigma
+nlev <- 4
+nreps <- rmin:rmax
+Delta <- 5
+power <- Fpower1(alpha,nlev,nreps,Delta,sigma)
+power
+
+#arreglo de campo
+set.seed(7638)
+f <- factor( rep( c("T0", "T1", "T2", "T3", "T4" ), each = 10))
+fac <- sample( f, 50)
+fac
+eu <- 1:50
+plan <- data.frame( parcela=eu, tratamientos=fac )
+plan
+write.csv( plan, file = "Plan.csv", row.names = FALSE)
+
+#Ejercicio 4 capitulo 2 Lawson
+library(readxl)
+PolvoHornear <- read_excel("PolvoHornear.xlsx")
+View(PolvoHornear)
+attach(PolvoHornear)
+
+#análisis descriptivo
+summary(PolvoHornear)
+hist(Altura)
+boxplot(Altura~Tratamiento)
+std<-sqrt(var(Altura))
+std
+#ANOVA a una vía CRD
+mod_1<-aov(Altura~Tratamiento)
+anova(mod_1)
+X<-model.matrix(mod_1)
+qr(X)$rank
+plot(mod_1)
+shapiro.test(resid(mod_1))
+
+
+
+# Modelamiento de CDR con falsas repeticiones
+
+peces<-read.table("~/Base de datos/FishTank.txt", h=T)
+attach(peces)
+summary(peces)
+
+#modelamiento sin corrección de variables
+mod1<-aov(WtGain~Diet)
+anova(mod1)
+
+#correccion por tipo de variable
+#mal por estructura del error
+Diet<-as.factor(Diet)
+mod2<-aov(WtGain~Diet)
+anova(mod2)
+summary(mod2)
+
+#modelamiento correcto
+mod3<-aov(WtGain~Diet + Error(Tank/Diet))
+anova(mod3)
+summary(mod3)
+
+
+#modelamiento anova completo con dos FV
+Tank<-as.factor(Tank)
+mod4<-aov(WtGain~Diet + Tank)
+anova(mod4)
+summary(mod4)
+
+#Para generar la matriz de diseño.
+mod5<-aov(WtGain~Diet+Tank/Diet)
+X<-model.matrix(mod5)
+qr(X)$
+
+
+
+  
+View(model.matrix(mod5))
+#PRUEBAS DE COMPARACION MULTIPLE
+library(agricolae)
+print(HSD.test(WtGain, Diet, 9,12, alpha = 0.05))
+
+  
