@@ -81,13 +81,93 @@ summary(mod4)
 mod5<-aov(WtGain~Diet+Tank/Diet)
 X<-model.matrix(mod5)
 qr(X)$
-
-
-
   
 View(model.matrix(mod5))
 #PRUEBAS DE COMPARACION MULTIPLE
 library(agricolae)
 print(HSD.test(WtGain, Diet, 9,12, alpha = 0.05))
 
+
+
+
+#EJERCICIO DATOS DE FOTOSINTESIS
+#DCA con 3 rep y 6 subrep
+#se mide fotosintesis neta en micromoles de CO2 por m2 por seg
+#T0=quimico, T1= quim + biologico
+#las subrepeticiones son hojas seleccionadas al azar en cada UE
+library(readxl)
+
+IRGA_C <- read_excel("~/bases_de_datosDE/IRGA_C.xlsx")
+View(IRGA_C)
+#analisis exploratorio
+#attach(IRGA)
+summary(IRGA_C)
+str(IRGA_C)
+hist(IRGA_C$Fotosintesis)
+boxplot(IRGA_C$Fotosintesis~IRGA_C$Tratamiento)
+#Modelamiento
+#modelo errado, no se consideran las subrepeticiones
+mod_0<-aov(Fotosintesis~Tratamiento, data = IRGA_C)
+anova(mod_0)
+hist(resid(mod_0))
+shapiro.test(resid(mod_0))
+bartlett.test(Fotosintesis~Tratamiento, data = IRGA_C)
+plot(mod_0)
+
+#modelo con test F correcto
+mod_1<-aov(Fotosintesis~Tratamiento + 
+             Error(Repeticion:Tratamiento),IRGA_C)
+summary(mod_1)
+
+#Prueba de Tukey
+
+library(emmeans)
+emmeans(mod_1, pairwise ~ Tratamiento, adjust = "tukey")
+
+#MODELO PROMEDIANDO LAS 6 REPETICIONES
+library(readxl)
+IRGA_2PRO <- read_excel("~/bases_de_datosDE/IRGA_2_AVG.xlsx")
+View(IRGA_2PRO)
+summary(IRGA_2PRO)
+boxplot(IRGA_2PRO$Fotosintesis~IRGA_2PRO$Tratamiento)
+hist(IRGA_2PRO$Fotosintesis)
+#modelo test F correcto
+mod_2<-aov(Fotosintesis~Tratamiento, IRGA_2PRO)
+summary(mod_2)
+shapiro.test(resid(mod_2))
+bartlett.test(Fotosintesis~Tratamiento, IRGA_2PRO)
+plot(mod_2)
+summary(IRGA_2PRO)
+boxplot(IRGA_2PRO$Fotosintesis~IRGA_2PRO$Tratamiento)
+hist(IRGA_2PRO$Fotosintesis)
+
+
+
+#DISEÑOS FACTORIALES COMPLETAMENTE ALEATORIZADOS
+# EJERCICIO 2.12 CASELLA
+camaron<-read.table("~/bases_de_datosDE/Shrimp.txt", h=T)
+summary(camaron)
+attach(camaron)
+#Exploratorio
+Temp<-as.factor(Temp)
+Density<-as.factor(Density)
+Salinity<-as.factor(Salinity)
+boxplot(WeightGain~Temp)
+boxplot(WeightGain~Density)
+boxplot(WeightGain~Salinity)
+
+#Modelar
+Mod_1<-aov(WeightGain~Temp*Density*Salinity)
+anova(Mod_1)
+#Bondad de Ajuste.
+cv<-100*sqrt(2904)/mean(WeightGain)
+cv
+#Supuestos
+shapiro.test(residuals(Mod_1))
+bartlett.test(WeightGain~Temp)
+bartlett.test(WeightGain~Density)
+bartlett.test(WeightGain~Salinity)
+
+plot(Mod_1)
+plot(WeightGain~Temp)
   
