@@ -170,4 +170,65 @@ bartlett.test(WeightGain~Salinity)
 
 plot(Mod_1)
 plot(WeightGain~Temp)
+
+
+camaron<-read.table("C:/Users/Tuptc/Downloads/Shrimp.txt", h=T)
+summary(camaron)
+attach(camaron)
+
+#Exploratorio
+Temp<-as.factor(Temp)
+Density<-as.factor(Density)
+Salinity<-as.factor(Salinity)
+boxplot(WeightGain~Temp)
+boxplot(WeightGain~Density)
+boxplot(WeightGain~Salinity)
+
+#Modelar
+mod_1<-aov(WeightGain~Temp*Density*Salinity)
+anova(mod_1)
+
+plot(TukeyHSD(mod_1))
+library(agricolae)
+print(HSD.test(camaron$WeightGain,camaron$Temp, 24, 2904))
+print(HSD.test(camaron$WeightGain,camaron$Density, 24, 2904))
+print(HSD.test(camaron$WeightGain,camaron$Salinity, 24, 2904))
+
+#Interacciones 
+interaction.plot(camaron$Salinity,camaron$Temp, camaron$WeightGain,mean)
+interaction.plot(camaron$Salinity,camaron$Density, camaron$WeightGain,mean)
+interaction.plot(camaron$Density,camaron$Temp, camaron$WeightGain,mean)
+TukeyHSD(mod_1)
+#Bondad de Ajuste.
+cv<-100*sqrt(2904)/mean(WeightGain)
+cv
+#Supuestos
+shapiro.test(residuals(mod_1))
+bartlett.test(camaron$WeightGain~camaron$Temp)
+bartlett.test(camaron$WeightGain~camaron$Density)
+bartlett.test(camaron$WeightGain~camaron$Salinity)
+
+plot(mod_1)
+plot(WeightGain~Temp)
+
+library(MASS)
+boxcox(mod_1)
+
+install.packages("car")
+library(car)
+help(aov)
+
+#usando lm
+options(contrasts=c("contr.sum","contr.poly"))
+
+mod_2<-aov(camaron$WeightGain~camaron$Temp*camaron$Density*camaron$Salinity)
+#Finally, call the drop1 function on each model component:
+drop1(mod_2, .~., test="F")
+
+
+#parcelas Divididas
+
+install.packages("AlgDesign")
+library(AlgDesign)
+
   
