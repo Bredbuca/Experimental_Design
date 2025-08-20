@@ -145,75 +145,45 @@ hist(IRGA_2PRO$Fotosintesis)
 
 #DISEÑOS FACTORIALES COMPLETAMENTE ALEATORIZADOS
 # EJERCICIO 2.12 CASELLA
-camaron<-read.table("~/bases_de_datosDE/Shrimp.txt", h=T)
+Shrimp<-read.table("Shrimp.txt", h=T)
+camaron_1<-read.table("shrimp_1.txt", h=T)
 summary(camaron)
 attach(camaron)
-#Exploratorio
-Temp<-as.factor(Temp)
-Density<-as.factor(Density)
-Salinity<-as.factor(Salinity)
+detach(camaron)
+#exploratorio
+Shrimp$Temp<-as.factor(Shrimp$Temp)
+Shrimp$Density<-as.factor(Shrimp$Density)
+Shrimp$Salinity<-as.factor(Shrimp$Salinity)
 boxplot(WeightGain~Temp)
 boxplot(WeightGain~Density)
 boxplot(WeightGain~Salinity)
-
-#Modelar
-Mod_1<-aov(WeightGain~Temp*Density*Salinity)
-anova(Mod_1)
-#Bondad de Ajuste.
-cv<-100*sqrt(2904)/mean(WeightGain)
-cv
-#Supuestos
-shapiro.test(residuals(Mod_1))
-bartlett.test(WeightGain~Temp)
-bartlett.test(WeightGain~Density)
-bartlett.test(WeightGain~Salinity)
-
-plot(Mod_1)
-plot(WeightGain~Temp)
-
-
-camaron<-read.table("C:/Users/Tuptc/Downloads/Shrimp.txt", h=T)
-summary(camaron)
-attach(camaron)
-
-#Exploratorio
-Temp<-as.factor(Temp)
-Density<-as.factor(Density)
-Salinity<-as.factor(Salinity)
-boxplot(WeightGain~Temp)
-boxplot(WeightGain~Density)
-boxplot(WeightGain~Salinity)
-
-#Modelar
-mod_1<-aov(WeightGain~Temp*Density*Salinity)
+boxplot(WeightGain~Treatment)
+#modelar
+mod_1<-aov(Shrimp$WeightGain~Shrimp$Temp*Shrimp$Density*Shrimp$Salinity)
 anova(mod_1)
-
 plot(TukeyHSD(mod_1))
-library(agricolae)
-print(HSD.test(camaron$WeightGain,camaron$Temp, 24, 2904))
-print(HSD.test(camaron$WeightGain,camaron$Density, 24, 2904))
-print(HSD.test(camaron$WeightGain,camaron$Salinity, 24, 2904))
-
-#Interacciones 
-interaction.plot(camaron$Salinity,camaron$Temp, camaron$WeightGain,mean)
-interaction.plot(camaron$Salinity,camaron$Density, camaron$WeightGain,mean)
-interaction.plot(camaron$Density,camaron$Temp, camaron$WeightGain,mean)
 TukeyHSD(mod_1)
-#Bondad de Ajuste.
-cv<-100*sqrt(2904)/mean(WeightGain)
-cv
-#Supuestos
-shapiro.test(residuals(mod_1))
-bartlett.test(camaron$WeightGain~camaron$Temp)
-bartlett.test(camaron$WeightGain~camaron$Density)
-bartlett.test(camaron$WeightGain~camaron$Salinity)
-
+library(agricolae)
+print(HSD.test(Shrimp$WeightGain, Shrimp$Temp, 24,  2904))
+print(HSD.test(Shrimp$WeightGain, Shrimp$Density, 24,  2904))
+print(HSD.test(Shrimp$WeightGain, Shrimp$Salinity, 24,  2904))
+#interacciones
+interaction.plot(Shrimp$Salinity, Shrimp$Temp, Shrimp$WeightGain, mean)
+interaction.plot(Shrimp$Salinity, Shrimp$Density, Shrimp$WeightGain, mean)
+interaction.plot(Shrimp$Density, Shrimp$Temp, Shrimp$WeightGain, mean)
+#bondad de ajuste
+CV<-100*sqrt(2904)/(mean(WeightGain))
+CV
+#supuestos
+shapiro.test(resid(mod_1))
+bartlett.test(camaron_1$WeightGain~camaron_1$Temp)
+bartlett.test(WeightGain~Density)
+bartlett.test(camaron_1$WeightGain~camaron_1$Salinity)
+bartlett.test(WeightGain~Treatment)
 plot(mod_1)
-plot(WeightGain~Temp)
-
+camaron
 library(MASS)
 boxcox(mod_1)
-
 install.packages("car")
 library(car)
 help(aov)
@@ -221,10 +191,9 @@ help(aov)
 #usando lm
 options(contrasts=c("contr.sum","contr.poly"))
 
-mod_2<-aov(camaron$WeightGain~camaron$Temp*camaron$Density*camaron$Salinity)
+mod_2<-aov(Shrimp$WeightGain~Shrimp$Temp*Shrimp$Density*Shrimp$Salinity)
 #Finally, call the drop1 function on each model component:
 drop1(mod_2, .~., test="F")
-
 
 #parcelas Divididas
 
