@@ -195,9 +195,83 @@ mod_2<-aov(Shrimp$WeightGain~Shrimp$Temp*Shrimp$Density*Shrimp$Salinity)
 #Finally, call the drop1 function on each model component:
 drop1(mod_2, .~., test="F")
 
-#parcelas Divididas
+# modelos mixtos
+library(daewr)
+gagerr
+modr1 <- aov( y ~ part + oper + part:oper, data = gagerr)
+summary(modr1)
 
-install.packages("AlgDesign")
-library(AlgDesign)
+#Componentes de varianza estimaciones
+sigma2 <- .000752
+sigma2po <- (0.026885 - sigma2) / 2
+sigma2po
+sigma2o <- (0.014852 - sigma2 - 2 * sigma2po ) / 20
+sigma2o
+sigma2p <- (.160991 - sigma2 - 2 * sigma2po ) / 6
+cat("Method of Moments Variance Component Estimates","\n",
+      + "Var(error)=",sigma2,"\n","Var(part x oper)=",sigma2po,"\n",
+      + "Var(oper)=",sigma2o,"\n","Var(part)=",sigma2p,"\n")
+
+#uso de librerialme4
+#factores aleatorios cruzados
+library(lme4)
+library(Matrix)
+modr2 <- lmer(y ~ 1 + (1|part) + (1|oper) + (1|part:oper),
+                data = gagerr)
+summary(modr2)
+confint(modr2)
+
+# 2 factores aleatorios B anidado en A
+
+mod2 <- aov( elasticity ~ supplier + supplier:batch +
+               + supplier:batch:sample, data = rubber)
+modr3 <- lmer( elasticity ~ 1+ (1|supplier) +
+                 + (1|supplier:batch) + (1|supplier:batch:sample), data = rubber)
+modr3
+summary(modr3)
+
+# modelos mixtos, con arreglo factorial 2^2.diseños con factores fijos y aleatorios.
+mod4 <- aov( residue ~ form + tech + form:tech + plot:form:tech,
+             data = pesticide)
+summary(mod4)
+#test correctos para forma de aplicacion
+1-pf(0.00002/0.00059,1,4) #para forma de aplicacion
+1-pf(0.03231/0.00059,1,4) #tecnica
+1-pf(0.00219/0.00059,1,4) #forma: tecnica
+
+library(lme4)
+c1 <- c( -.5, .5 )
+mod5 <- lmer( residue ~ 1 + form + form:tech +
+                  (1|plot:form:tech), contrasts = list( form = c1,
+                                                           tech = c1), data = pesticide, REML = FALSE)
+summary(mod5)
+confint(mod5)
+
+library(lsmeans)
+lsmeans(mod5, pairwise ~ tech, adjust = c("tukey"))
+
+lsmeans(mod5, pairwise ~ form, adjust = c("tukey"))
+
+#modelo 6
+mod6 <- lm( residue ~ 1 + form + tech + form:tech, contrasts = list( form = c1,
+                                                      tech = c1), data = pesticide, REML=FALSE)
+summary(mod6)
+
+#modelo 7
+#razon de verosimilitudes para efecto aleatorio
+mod7 <- lmer( residue ~ 1 + form + tech + form:tech +
+                (1|plot:form:tech), contrasts = list( form = c1,
+                                                      tech = c1), data = pesticide, REML = FALSE)
+summary(mod7)
+irtstat<-as.numeric(2*logLik(mod5)-logLik(mod6))
+pvalor<-pchisq(irtstat,1,lower=FALSE)
+irtstat2<-as.numeric(2*logLik(mod5)-logLik(mod7))
+pvalor2<-pchisq(irtstat2,1,lower=FALSE)
+
+mod8<-lmer( residue ~ 1  + form:tech +
+              (1|plot:form:tech), contrasts = list( form = c1,
+                                                    tech = c1), data = pesticide, REML = FALSE)
+irstat3<-as.numeric(2*logLik(mod5)-logLik(mod8))
+pvalor3<-pchisq(irstat3,1,lower=FALSE)
 
   
