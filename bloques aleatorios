@@ -1,0 +1,10 @@
+#Diseño de bloques completos
+library(daewr)
+mod1 <- aov( rate ~ rat + dose, data = drug )
+summary(mod1)
+print(HSD.test(drug$rate, drug$dose,36,0.00835))
+plot(mod1)
+bartlett.test(mod1)
+shapiro.test(residuals(mod1))
+bartlett.test(drug$rate~drug$dose)
+boxplot(drug$rate~drug$dose)
